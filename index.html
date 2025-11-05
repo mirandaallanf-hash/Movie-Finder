@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Buscador de Películas</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto;
+      background:#0f172a;
+      color:#e5e7eb;
+    }
+    header{
+      padding:16px 24px;
+      background:#020617;
+      border-bottom:1px solid #1f2937;
+    }
+    h1{margin:0;font-size:22px;}
+    .container{max-width:1100px;margin:0 auto;padding:20px 24px;}
+    .search-box{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-bottom:20px;
+      align-items:center;
+    }
+    .search-box input{
+      flex:1;
+      min-width:220px;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid #4b5563;
+      background:#020617;
+      color:#e5e7eb;
+    }
+    .btn{
+      padding:10px 16px;
+      border-radius:10px;
+      border:none;
+      background:#0ea5e9;
+      color:white;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn:hover{opacity:.9;}
+    #results{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+      gap:16px;
+    }
+    .card{
+      background:#020617;
+      border-radius:14px;
+      padding:12px;
+      border:1px solid #1f2937;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .card img{
+      width:100%;
+      border-radius:10px;
+      object-fit:cover;
+      max-height:330px;
+    }
+    .title-row{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:flex-start;
+    }
+    .title-row h2{
+      font-size:16px;
+      margin:0;
+    }
+    .year{
+      font-size:13px;
+      color:#9ca3af;
+      white-space:nowrap;
+    }
+    .overview{
+      font-size:13px;
+      color:#9ca3af;
+      max-height:70px;
+      overflow:hidden;
+    }
+    .providers{
+      font-size:13px;
+    }
+    .tag{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#0f766e;
+      font-size:11px;
+      margin-right:4px;
+      margin-top:4px;
+    }
+    #status{
+      margin-bottom:10px;
+      font-size:14px;
+      color:#9ca3af;
+    }
+    @media (max-width:600px){
+      header{padding:12px 16px;}
+      .container{padding:16px;}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎬 Buscador de Películas + Dónde Verlas</h1>
+  </header>
+
+  <main class="container">
+    <div class="search-box">
+      <input id="query" placeholder="Escribe el nombre de la película (ej: Inception, Batman, etc.)">
+      <button id="searchBtn" class="btn">Buscar</button>
+    </div>
+    <p id="status">Escribe un título y presiona “Buscar”.</p>
+    <div id="results"></div>
+  </main>
+
+  <script>
+    const API_KEY = "TU_API_KEY_TMDB"; // ⬅️ pon aquí tu API key de TMDB
+    const BASE_URL = "https://api.themoviedb.org/3";
+    const IMG_BASE = "https://image.tmdb.org/t/p/w342";
+
+    // Región para proveedores (dónde está disponible)
+    // Puedes probar con "US", "MX", "AR", "ES". GT casi nunca tiene datos.
+    const REGION = "US";
+
+    const queryInput = document.getElementById('query');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsEl = document.getElementById('results');
+    const statusEl = document.getElementById('status');
+
+    async function searchMovies(){
+      const query = queryInput.value.trim();
+      if(!query){
+        statusEl.textContent = "Escribe el nombre de una película primero.";
+        return;
+      }
+
+      statusEl.textContent = "Buscando películas...";
+      resultsEl.innerHTML = "";
+
+      try{
+        const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`);
+        if(!res.ok) throw new Error("Error en la búsqueda");
+        const data = await res.json();
+
+        if(!data.results || data.results.length === 0){
+          statusEl.textContent = "No se encontraron resultados. Prueba con otro título.";
+          return;
+        }
+
+        // Tomamos las primeras 6 pelis para no abusar de la API
+        const top = data.results.slice(0, 6);
+
+        // Para cada peli, pedimos también “watch providers”
+        const moviesWithProviders = await Promise.all(
+          top.map(async movie => {
+            const provRes = await fetch(`${BASE_URL}/movie/${movie.id}/watch/providers?api_key=${API_KEY}`);
+            let providers = [];
+            if(provRes.ok){
+              const provData = await provRes.json();
+              const regionData = provData.results[REGION];
+              if(regionData){
+                const flatrate = regionData.flatrate || [];
+                providers = flatrate.map(p => p.name);
+              }
+            }
+            return {...movie, providers};
+          })
+        );
+
+        renderResults(moviesWithProviders);
+        statusEl.textContent = `Mostrando ${moviesWithProviders.length} resultados para "${query}".`;
+      }catch(err){
+        console.error(err);
+        statusEl.textContent = "Ocurrió un error al buscar. Intenta de nuevo más tarde.";
+      }
+    }
+
+    function renderResults(movies){
+      resultsEl.innerHTML = "";
+      movies.forEach(movie => {
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        const img = document.createElement('img');
+        if(movie.poster_path){
+          img.src = IMG_BASE + movie.poster_path;
+          img.alt = movie.title;
+        }else{
+          img.alt = "Sin póster disponible";
+        }
+
+        const titleRow = document.createElement('div');
+        titleRow.className = 'title-row';
+
+        const title = document.createElement('h2');
+        title.textContent = movie.title;
+
+        const year = document.createElement('span');
+        year.className = 'year';
+        year.textContent = movie.release_date ? movie.release_date.slice(0,4) : "Sin año";
+
+        titleRow.appendChild(title);
+        titleRow.appendChild(year);
+
+        const overview = document.createElement('p');
+        overview.className = 'overview';
+        overview.textContent = movie.overview || "Sin sinopsis en español.";
+
+        const providers = document.createElement('p');
+        providers.className = 'providers';
+
+        if(movie.providers && movie.providers.length > 0){
+          providers.innerHTML = "Disponible en:<br>";
+          movie.providers.forEach(name => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.textContent = name;
+            providers.appendChild(span);
+          });
+        }else{
+          providers.textContent = "No hay información de plataformas de streaming para la región seleccionada.";
+        }
+
+        card.appendChild(img);
+        card.appendChild(titleRow);
+        card.appendChild(overview);
+        card.appendChild(providers);
+
+        resultsEl.appendChild(card);
+      });
+    }
+
+    searchBtn.addEventListener('click', searchMovies);
+    queryInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') searchMovies();
+    });
+  </script>
+</body>
+</html>
