@@ -15,39 +15,23 @@ body {
   align-items: center;
   font-family: 'Segoe UI', sans-serif;
   overflow-x: hidden;
-  padding: 15px;
 }
 
 .card {
   background: white;
-  padding: 20px;
+  padding: 22px;
   border-radius: 25px;
   text-align: center;
   box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-  width: 100%;
+  width: 90%;
   max-width: 360px;
+  position: relative;
 }
 
 h1 {
   color: #e63946;
-  margin-bottom: 12px;
-  font-size: 22px;
-}
-
-/* FOTO */
-.photo {
-  width: 100%;
-  height: 190px;
-  border-radius: 20px;
-  background: #f1f1f1;
   margin-bottom: 15px;
-  overflow: hidden;
-}
-
-.photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  font-size: 22px;
 }
 
 /* BOTONES */
@@ -59,6 +43,7 @@ button {
   border-radius: 14px;
   cursor: pointer;
   width: 90%;
+  transition: transform 0.3s;
 }
 
 .yes {
@@ -69,13 +54,20 @@ button {
 .no {
   background: #adb5bd;
   color: white;
-  position: relative;
+  position: absolute;
+}
+
+/* MENSAJE TROLL */
+#trollMsg {
+  font-size: 14px;
+  color: #e63946;
+  margin-top: 12px;
+  display: none;
 }
 
 /* CORAZONES */
 .heart {
   position: absolute;
-  color: red;
   font-size: 18px;
   animation: float 5s linear infinite;
 }
@@ -86,7 +78,7 @@ button {
 }
 
 .big-heart {
-  font-size: 56px;
+  font-size: 60px;
   animation: pulse 1s infinite;
 }
 
@@ -95,7 +87,6 @@ button {
   50% { transform: scale(1.4); }
 }
 
-/* INVITACIÓN */
 .invite {
   font-size: 15px;
   color: #333;
@@ -104,64 +95,75 @@ button {
 
 .invite strong {
   color: #e63946;
-  font-size: 17px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <div class="photo">
-    <!-- CAMBIA AQUÍ LA RUTA DE LA FOTO -->
-    <img src="TU_FOTO_AQUI.jpg" alt="Nuestra foto">
-  </div>
-
+<div class="card" id="card">
   <h1 id="text">¿Quieres ser mi Valentine? 💖</h1>
 
   <div id="buttons">
-    <button class="yes" onclick="yesMain()">Sí 💘</button>
-    <button class="no" id="noBtn" onclick="noMain()">No 😢</button>
+    <button class="yes" id="yesBtn" onclick="yesMain()">Sí 💘</button>
+    <button class="no" id="noBtn">No 😢</button>
   </div>
+
+  <p id="trollMsg"></p>
 </div>
 
-<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+<audio id="trollSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
 
 <script>
-function playClick() {
-  document.getElementById("clickSound").play();
-}
-
-/* BOTÓN NO SE MUEVE */
 const noBtn = document.getElementById("noBtn");
-noBtn.addEventListener("touchstart", () => {
-  const x = Math.random() * 120 - 60;
-  const y = Math.random() * 120 - 60;
-  noBtn.style.transform = `translate(${x}px, ${y}px)`;
-});
+const yesBtn = document.getElementById("yesBtn");
+const card = document.getElementById("card");
+const trollMsg = document.getElementById("trollMsg");
+const trollSound = document.getElementById("trollSound");
 
-/* FLUJOS */
-function noMain() {
-  playClick();
-  document.getElementById("text").innerText = "¿Estás segura? 🤨";
-  document.getElementById("buttons").innerHTML = `
-    <button class="yes" onclick="sureYes()">Sí</button>
-    <button class="no" onclick="backHome()">No</button>
-  `;
+let scale = 1;
+
+const messages = [
+  "jaja buen intento 😜",
+  "nop 😏",
+  "casi… pero no 😂",
+  "no tan fácil 😈",
+  "solo hay una opción 💘"
+];
+
+function moveNoButton() {
+  const cardRect = card.getBoundingClientRect();
+  const x = Math.random() * (cardRect.width - 120);
+  const y = Math.random() * (cardRect.height - 60);
+
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
+
+  trollMsg.innerText = messages[Math.floor(Math.random() * messages.length)];
+  trollMsg.style.display = "block";
+
+  trollSound.currentTime = 0;
+  trollSound.play();
+
+  if (navigator.vibrate) {
+    navigator.vibrate(100);
+  }
+
+  scale += 0.1;
+  yesBtn.style.transform = `scale(${scale})`;
+
+  clearTimeout(trollMsg.timer);
+  trollMsg.timer = setTimeout(() => {
+    trollMsg.style.display = "none";
+  }, 1200);
 }
 
-function sureYes() {
-  playClick();
-  document.getElementById("text").innerText = "Again… ¿estás segura? 😏";
-}
-
-function backHome() {
-  location.reload();
-}
+/* ACTIVADORES */
+noBtn.addEventListener("mouseover", moveNoButton);
+noBtn.addEventListener("mousedown", moveNoButton);
+noBtn.addEventListener("touchstart", moveNoButton);
 
 function yesMain() {
-  playClick();
-
   document.getElementById("text").innerHTML = "💌 Invitación Especial 💌";
 
   document.getElementById("buttons").innerHTML = `
@@ -173,15 +175,6 @@ function yesMain() {
         Tengo algo muy especial preparado para nosotros ✨
       </p>
 
-      <a href="https://calendar.google.com/calendar/render?action=TEMPLATE
-      &text=Valentine+Date+💘
-      &dates=20260214T170000/20260214T220000
-      &details=Reserva+tus+planes,+tenemos+una+cita+especial+✨
-      &sf=true&output=xml"
-      target="_blank">
-        <button class="yes">📅 Añadir a mi calendario</button>
-      </a>
-
       <span class="big-heart">❤️</span>
     </div>
   `;
@@ -189,7 +182,6 @@ function yesMain() {
   hearts();
 }
 
-/* CORAZONES */
 function hearts() {
   setInterval(() => {
     const heart = document.createElement("div");
@@ -199,13 +191,10 @@ function hearts() {
     heart.style.fontSize = Math.random() * 16 + 14 + "px";
     document.body.appendChild(heart);
 
-    setTimeout(() => {
-      heart.remove();
-    }, 5000);
-  }, 350);
+    setTimeout(() => heart.remove(), 5000);
+  }, 300);
 }
 </script>
 
 </body>
 </html>
-
