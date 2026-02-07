@@ -1,250 +1,186 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Buscador de Películas</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto;
-      background:#0f172a;
-      color:#e5e7eb;
-    }
-    header{
-      padding:16px 24px;
-      background:#020617;
-      border-bottom:1px solid #1f2937;
-    }
-    h1{margin:0;font-size:22px;}
-    .container{max-width:1100px;margin:0 auto;padding:20px 24px;}
-    .search-box{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-bottom:20px;
-      align-items:center;
-    }
-    .search-box input{
-      flex:1;
-      min-width:220px;
-      padding:10px;
-      border-radius:10px;
-      border:1px solid #4b5563;
-      background:#020617;
-      color:#e5e7eb;
-    }
-    .btn{
-      padding:10px 16px;
-      border-radius:10px;
-      border:none;
-      background:#0ea5e9;
-      color:white;
-      cursor:pointer;
-      font-weight:600;
-    }
-    .btn:hover{opacity:.9;}
-    #results{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-      gap:16px;
-    }
-    .card{
-      background:#020617;
-      border-radius:14px;
-      padding:12px;
-      border:1px solid #1f2937;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .card img{
-      width:100%;
-      border-radius:10px;
-      object-fit:cover;
-      max-height:330px;
-    }
-    .title-row{
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-      align-items:flex-start;
-    }
-    .title-row h2{
-      font-size:16px;
-      margin:0;
-    }
-    .year{
-      font-size:13px;
-      color:#9ca3af;
-      white-space:nowrap;
-    }
-    .overview{
-      font-size:13px;
-      color:#9ca3af;
-      max-height:70px;
-      overflow:hidden;
-    }
-    .providers{
-      font-size:13px;
-    }
-    .tag{
-      display:inline-block;
-      padding:3px 8px;
-      border-radius:999px;
-      background:#0f766e;
-      font-size:11px;
-      margin-right:4px;
-      margin-top:4px;
-    }
-    #status{
-      margin-bottom:10px;
-      font-size:14px;
-      color:#9ca3af;
-    }
-    @media (max-width:600px){
-      header{padding:12px 16px;}
-      .container{padding:16px;}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine 💘</title>
+
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff758c, #ff7eb3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 25px;
+  text-align: center;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+  width: 100%;
+  max-width: 360px;
+}
+
+h1 {
+  color: #e63946;
+  margin-bottom: 15px;
+  font-size: 22px;
+}
+
+/* BOTONES */
+button {
+  padding: 14px 20px;
+  margin: 8px 5px;
+  font-size: 16px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  width: 90%;
+}
+
+.yes {
+  background: #e63946;
+  color: white;
+}
+
+.no {
+  background: #adb5bd;
+  color: white;
+  position: relative;
+}
+
+/* CORAZONES */
+.heart {
+  position: absolute;
+  color: red;
+  font-size: 18px;
+  animation: float 5s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100vh); opacity: 0; }
+}
+
+.big-heart {
+  font-size: 56px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+
+/* INVITACIÓN */
+.invite {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.invite strong {
+  color: #e63946;
+  font-size: 17px;
+}
+</style>
 </head>
+
 <body>
-  <header>
-    <h1>🎬 Buscador de Películas + Dónde Verlas</h1>
-  </header>
 
-  <main class="container">
-    <div class="search-box">
-      <input id="query" placeholder="Escribe el nombre de la película (ej: Inception, Batman, etc.)">
-      <button id="searchBtn" class="btn">Buscar</button>
+<div class="card">
+  <h1 id="text">¿Quieres ser mi Valentine? 💖</h1>
+
+  <div id="buttons">
+    <button class="yes" onclick="yesMain()">Sí 💘</button>
+    <button class="no" id="noBtn" onclick="noMain()">No 😢</button>
+  </div>
+</div>
+
+<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+
+<script>
+function playClick() {
+  document.getElementById("clickSound").play();
+}
+
+/* BOTÓN NO SE ESCAPA (MÓVIL) */
+const noBtn = document.getElementById("noBtn");
+noBtn.addEventListener("touchstart", () => {
+  const x = Math.random() * 120 - 60;
+  const y = Math.random() * 120 - 60;
+  noBtn.style.transform = `translate(${x}px, ${y}px)`;
+});
+
+/* FLUJOS */
+function noMain() {
+  playClick();
+  document.getElementById("text").innerText = "¿Estás segura? 🤨";
+  document.getElementById("buttons").innerHTML = `
+    <button class="yes" onclick="sureYes()">Sí</button>
+    <button class="no" onclick="backHome()">No</button>
+  `;
+}
+
+function sureYes() {
+  playClick();
+  document.getElementById("text").innerText = "Again… ¿estás segura? 😏";
+}
+
+function backHome() {
+  location.reload();
+}
+
+function yesMain() {
+  playClick();
+
+  document.getElementById("text").innerHTML = "💌 Invitación Especial 💌";
+
+  document.getElementById("buttons").innerHTML = `
+    <div class="invite">
+      <p><strong>14 de febrero de 2026</strong></p>
+      <p>Desde las <strong>17:00</strong></p>
+      <p>
+        Reserva tus planes 💕<br>
+        Tengo algo muy especial preparado para nosotros ✨
+      </p>
+
+      <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Valentine+Date+%F0%9F%92%98&dates=20260214T170000/20260214T220000&details=Reserva+tus+planes%2C+tenemos+una+cita+especial+%E2%9C%A8&sf=true&output=xml"
+         target="_blank">
+        <button class="yes">📅 Añadir a mi calendario</button>
+      </a>
+
+      <span class="big-heart">❤️</span>
     </div>
-    <p id="status">Escribe un título y presiona “Buscar”.</p>
-    <div id="results"></div>
-  </main>
+  `;
 
-  <script>
-    const API_KEY = "TU_API_KEY_TMDB"; // ⬅️ pon aquí tu API key de TMDB
-    const BASE_URL = "https://api.themoviedb.org/3";
-    const IMG_BASE = "https://image.tmdb.org/t/p/w342";
+  hearts();
+}
 
-    // Región para proveedores (dónde está disponible)
-    // Puedes probar con "US", "MX", "AR", "ES". GT casi nunca tiene datos.
-    const REGION = "US";
+/* CORAZONES FLOTANDO */
+function hearts() {
+  setInterval(() => {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerText = "❤️";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.fontSize = Math.random() * 16 + 14 + "px";
+    document.body.appendChild(heart);
 
-    const queryInput = document.getElementById('query');
-    const searchBtn = document.getElementById('searchBtn');
-    const resultsEl = document.getElementById('results');
-    const statusEl = document.getElementById('status');
+    setTimeout(() => {
+      heart.remove();
+    }, 5000);
+  }, 350);
+}
+</script>
 
-    async function searchMovies(){
-      const query = queryInput.value.trim();
-      if(!query){
-        statusEl.textContent = "Escribe el nombre de una película primero.";
-        return;
-      }
-
-      statusEl.textContent = "Buscando películas...";
-      resultsEl.innerHTML = "";
-
-      try{
-        const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`);
-        if(!res.ok) throw new Error("Error en la búsqueda");
-        const data = await res.json();
-
-        if(!data.results || data.results.length === 0){
-          statusEl.textContent = "No se encontraron resultados. Prueba con otro título.";
-          return;
-        }
-
-        // Tomamos las primeras 6 pelis para no abusar de la API
-        const top = data.results.slice(0, 6);
-
-        // Para cada peli, pedimos también “watch providers”
-        const moviesWithProviders = await Promise.all(
-          top.map(async movie => {
-            const provRes = await fetch(`${BASE_URL}/movie/${movie.id}/watch/providers?api_key=${API_KEY}`);
-            let providers = [];
-            if(provRes.ok){
-              const provData = await provRes.json();
-              const regionData = provData.results[REGION];
-              if(regionData){
-                const flatrate = regionData.flatrate || [];
-                providers = flatrate.map(p => p.name);
-              }
-            }
-            return {...movie, providers};
-          })
-        );
-
-        renderResults(moviesWithProviders);
-        statusEl.textContent = `Mostrando ${moviesWithProviders.length} resultados para "${query}".`;
-      }catch(err){
-        console.error(err);
-        statusEl.textContent = "Ocurrió un error al buscar. Intenta de nuevo más tarde.";
-      }
-    }
-
-    function renderResults(movies){
-      resultsEl.innerHTML = "";
-      movies.forEach(movie => {
-        const card = document.createElement('article');
-        card.className = 'card';
-
-        const img = document.createElement('img');
-        if(movie.poster_path){
-          img.src = IMG_BASE + movie.poster_path;
-          img.alt = movie.title;
-        }else{
-          img.alt = "Sin póster disponible";
-        }
-
-        const titleRow = document.createElement('div');
-        titleRow.className = 'title-row';
-
-        const title = document.createElement('h2');
-        title.textContent = movie.title;
-
-        const year = document.createElement('span');
-        year.className = 'year';
-        year.textContent = movie.release_date ? movie.release_date.slice(0,4) : "Sin año";
-
-        titleRow.appendChild(title);
-        titleRow.appendChild(year);
-
-        const overview = document.createElement('p');
-        overview.className = 'overview';
-        overview.textContent = movie.overview || "Sin sinopsis en español.";
-
-        const providers = document.createElement('p');
-        providers.className = 'providers';
-
-        if(movie.providers && movie.providers.length > 0){
-          providers.innerHTML = "Disponible en:<br>";
-          movie.providers.forEach(name => {
-            const span = document.createElement('span');
-            span.className = 'tag';
-            span.textContent = name;
-            providers.appendChild(span);
-          });
-        }else{
-          providers.textContent = "No hay información de plataformas de streaming para la región seleccionada.";
-        }
-
-        card.appendChild(img);
-        card.appendChild(titleRow);
-        card.appendChild(overview);
-        card.appendChild(providers);
-
-        resultsEl.appendChild(card);
-      });
-    }
-
-    searchBtn.addEventListener('click', searchMovies);
-    queryInput.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') searchMovies();
-    });
-  </script>
 </body>
 </html>
+
