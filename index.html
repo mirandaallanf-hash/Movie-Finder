@@ -20,7 +20,7 @@ body {
 
 .card {
   background: white;
-  padding: 22px;
+  padding: 20px;
   border-radius: 25px;
   text-align: center;
   box-shadow: 0 15px 30px rgba(0,0,0,0.25);
@@ -30,8 +30,24 @@ body {
 
 h1 {
   color: #e63946;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   font-size: 22px;
+}
+
+/* FOTO */
+.photo {
+  width: 100%;
+  height: 190px;
+  border-radius: 20px;
+  background: #f1f1f1;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* BOTONES */
@@ -96,6 +112,11 @@ button {
 <body>
 
 <div class="card">
+  <div class="photo">
+    <!-- CAMBIA AQUÍ LA RUTA DE LA FOTO -->
+    <img src="TU_FOTO_AQUI.jpg" alt="Nuestra foto">
+  </div>
+
   <h1 id="text">¿Quieres ser mi Valentine? 💖</h1>
 
   <div id="buttons">
@@ -111,7 +132,7 @@ function playClick() {
   document.getElementById("clickSound").play();
 }
 
-/* BOTÓN NO SE ESCAPA (MÓVIL) */
+/* BOTÓN NO SE MUEVE */
 const noBtn = document.getElementById("noBtn");
 noBtn.addEventListener("touchstart", () => {
   const x = Math.random() * 120 - 60;
@@ -152,8 +173,12 @@ function yesMain() {
         Tengo algo muy especial preparado para nosotros ✨
       </p>
 
-      <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Valentine+Date+%F0%9F%92%98&dates=20260214T170000/20260214T220000&details=Reserva+tus+planes%2C+tenemos+una+cita+especial+%E2%9C%A8&sf=true&output=xml"
-         target="_blank">
+      <a href="https://calendar.google.com/calendar/render?action=TEMPLATE
+      &text=Valentine+Date+💘
+      &dates=20260214T170000/20260214T220000
+      &details=Reserva+tus+planes,+tenemos+una+cita+especial+✨
+      &sf=true&output=xml"
+      target="_blank">
         <button class="yes">📅 Añadir a mi calendario</button>
       </a>
 
@@ -164,7 +189,7 @@ function yesMain() {
   hearts();
 }
 
-/* CORAZONES FLOTANDO */
+/* CORAZONES */
 function hearts() {
   setInterval(() => {
     const heart = document.createElement("div");
